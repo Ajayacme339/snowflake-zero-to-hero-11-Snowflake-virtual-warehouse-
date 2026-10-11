@@ -1,0 +1,107 @@
+USE ROLE ACCOUNTADMIN;
+
+CREATE OR REPLACE WAREHOUSE DEMO_WAREHOUSE1 
+WAREHOUSE_SIZE = 'XSMALL'
+AUTO_SUSPEND = 60
+--INTITIALLY_AUTO_SUSPENDED = TRUE 
+AUTO_RESUME = TRUE 
+COMMENT = 'This is my first warehouse';
+
+----Check details of Warehouses -----------
+SHOW WAREHOUSES;
+
+----2nd Warehouse ---Pass value for warehouse size
+CREATE OR REPLACE WAREHOUSE DEMO_WAREHOUSE2
+WAREHOUSE_SIZE = 'XSMALL';
+
+----Change the State of warehouse --------------
+ALTER WAREHOUSE DEMO_WAREHOUSE2 SUSPEND;
+
+SHOW WAREHOUSES;
+
+----Change the State of warehouse --------------
+ALTER WAREHOUSE DEMO_WAREHOUSE1 RESUME;
+
+SHOW WAREHOUSES;
+
+----------Scaling UP ----
+ALTER WAREHOUSE DEMO_WAREHOUSE1 SET
+WAREHOUSE_SIZE = 'LARGE';
+
+---------------Scaling down -------------
+ALTER WAREHOUSE DEMO_WAREHOUSE1 SET
+WAREHOUSE_SIZE = 'XSMALL';
+
+SHOW WAREHOUSES;
+-----------Scaling in/sacaling out ----------
+ALTER WAREHOUSE DEMO_WAREHOUSE2 
+SET MIN_CLUSTER_COUNT = 1
+MAX_CLUSTER_COUNT = 4;
+
+SHOW WAREHOUSES;
+
+ALTER WAREHOUSE DEMO_WAREHOUSE2 RESUME;
+SHOW WAREHOUSES;
+
+-----
+ALTER WAREHOUSE DEMO_WAREHOUSE1 RESUME;
+USE WAREHOUSE DEMO_WAREHOUSE1;
+SELECT c_mktsegment, COUNT(*)
+FROM snowflake_sample_data
+     .tpch_sf1.customer
+GROUP BY 1;
+
+---2.2 sec---
+---261 ms ---
+ALTER SESSION SET
+  USE_CACHED_RESULT = FALSE;
+  ------1.6 sec-----
+  SELECT c_mktsegment, COUNT(*)
+FROM snowflake_sample_data
+     .tpch_sf1.customer
+GROUP BY 1;
+---------------------------
+
+CREATE RESOURCE MONITOR demo_rm
+  WITH CREDIT_QUOTA = 10
+  TRIGGERS ON 80 PERCENT DO NOTIFY
+           ON 100 PERCENT DO SUSPEND;
+
+           ALTER WAREHOUSE DEMO_WAREHOUSE1
+  SET RESOURCE_MONITOR = demo_rm;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------
+SHOW WAREHOUSES;
+
+
+
+
+
+
+
+
+
+
+
+
+
